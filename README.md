@@ -24,6 +24,7 @@ This is a personal Fortinet lab built in EVE-NG to gain hands-on experience with
 
 This lab is designed to simulate a real-world enterprise network and improve troubleshooting and deployment skills.
 
+Also, quick tip from my setup—running FortiManager and FortiAnalyzer on ESXi gave me much better performance compared to EVE-NG.
 
 
 \## How to use
