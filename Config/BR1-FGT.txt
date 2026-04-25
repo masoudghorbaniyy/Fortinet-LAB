@@ -1,0 +1,313 @@
+BR1-FGT # 
+BR1-FGT # show system interface
+config system interface
+    edit "port1"
+        set vdom "root"
+        set ip 192.168.2.62 255.255.255.0
+        set allowaccess ping https ssh http fgfm
+        set type physical
+        set alias "MGMT"
+        set snmp-index 1
+    next
+    edit "port2"
+        set vdom "root"
+        set ip 198.51.100.6 255.255.255.252
+        set allowaccess ping https ssh
+        set type physical
+        set alias "WAN1-INET"
+        set role wan
+        set snmp-index 2
+    next
+    edit "port3"
+        set vdom "root"
+        set ip 203.0.113.6 255.255.255.252
+        set allowaccess ping https ssh
+        set type physical
+        set alias "WAN2-MPLS"
+        set role wan
+        set snmp-index 3
+    next
+    edit "port4"
+        set vdom "root"
+        set type physical
+        set snmp-index 4
+    next
+    edit "port5"
+        set vdom "root"
+        set ip 10.10.62.1 255.255.255.0
+        set allowaccess ping
+        set type physical
+        set alias "LAN"
+        set snmp-index 5
+        set ip-managed-by-fortiipam disable
+    next
+    edit "port6"
+        set vdom "root"
+        set ip 10.11.6.1 255.255.255.0
+        set type physical
+        set alias "WAN_Test"
+        set snmp-index 6
+        set ip-managed-by-fortiipam disable
+    next
+    edit "port7"
+        set vdom "root"
+        set ip 10.11.7.1 255.255.255.0
+        set type physical
+        set alias "LAN_TEST"
+        set snmp-index 7
+        set ip-managed-by-fortiipam disable
+    next 
+    edit "port8"
+        set vdom "root"
+        set type physical
+        set snmp-index 8
+    next 
+    edit "naf.root"
+        set vdom "root"
+        set type tunnel
+        set src-check disable
+        set snmp-index 9
+    next 
+    edit "l2t.root"
+        set vdom "root"
+        set type tunnel
+        set snmp-index 10
+    next 
+    edit "ssl.root"
+        set vdom "root"
+        set type tunnel
+        set alias "Agentless VPN interface"
+        set snmp-index 11
+    next 
+    edit "fortilink"
+        set vdom "root"
+        set fortilink enable
+        set ip 10.255.1.1 255.255.255.0
+        set allowaccess ping fabric
+        set type aggregate
+        set lldp-reception enable
+        set lldp-transmission enable
+        set snmp-index 12
+        set fortilink-neighbor-detect fortilink
+    next 
+    edit "Hub_Spoke_1"
+        set vdom "root"
+        set allowaccess ping
+        set type tunnel
+        set role wan
+        set snmp-index 114
+        set interface "port2"
+    next 
+end      
+
+BR1-FGT # 
+
+
+BR1-FGT # show router bgp
+config router bgp
+    set as 65101
+    set router-id 198.51.100.6
+    config neighbor
+        edit "198.51.100.5"
+            set remote-as 65210
+        next
+        edit "203.0.113.5"
+            set remote-as 65200
+        next
+    end
+    config network
+        edit 1
+            set prefix 10.10.62.0 255.255.255.0
+        next
+    end
+    config redistribute "connected"
+    end
+    config redistribute "rip"
+    end
+    config redistribute "ospf"
+    end
+    config redistribute "static"
+    end
+    config redistribute "isis"
+    end
+    config redistribute6 "connected"
+    end
+    config redistribute6 "rip"
+    end
+    config redistribute6 "ospf"
+    end
+    config redistribute6 "static"
+    end
+    config redistribute6 "isis"
+    end
+end
+
+BR1-FGT # 
+BR1-FGT # 
+
+BR1-FGT # show firewall policy
+config firewall policy
+    edit 20
+        set name "HQ_PATHS_to_BR1_LAN"
+        set uuid cab25d7a-3e10-51f1-84e8-1b70e4cf62d7
+        set srcintf "HQ_PATHS"
+        set dstintf "port5"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+    edit 21
+        set name "BR1_LAN_to_HQ_PATHS"
+        set uuid cab709a6-3e10-51f1-4676-553a0500efd4
+        set srcintf "port5"
+        set dstintf "HQ_PATHS"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+end
+
+
+
+BR1-FGT # show vpn ipsec phase1-interface
+config vpn ipsec phase1-interface
+    edit "Hub_Spoke_1"
+        set interface "port2"
+        set keylife 28800
+        set peertype any
+        set net-device disable
+        set proposal aes128-sha256 aes256-sha256
+        set comments "[created by FMG VPN Manager]"
+        set dhgrp 5 14
+        set remote-gw 198.51.100.2
+        set psksecret ENC ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    next
+end
+
+BR1-FGT # show vpn ipsec phase2-interface
+config vpn ipsec phase2-interface
+    edit "Hub_Spoke_1_0"
+        set phase1name "Hub_Spoke_1"
+        set proposal aes128-sha256 aes256-sha256 aes128-sha1 aes256-sha1 aes128gcm aes256gcm chacha20poly1305
+        set dhgrp 5 14
+        set comments "[created by FMG VPN Manager]"
+        set keylifeseconds 1800
+    next
+end
+
+BR1-FGT # show system sdwan
+config system sdwan
+    set status enable
+    config zone
+        edit "virtual-wan-link"
+        next
+        edit "HQ_PATHS"
+        next
+    end
+    config members
+        edit 2
+            set interface "Hub_Spoke_1"
+            set zone "HQ_PATHS"
+        next
+        edit 1
+            set interface "port3"
+            set zone "HQ_PATHS"
+            set gateway 203.0.113.5
+        next
+    end
+    config health-check
+        edit "Default_DNS"
+            set system-dns enable
+            set interval 1000
+            set probe-timeout 1000
+            set recoverytime 10
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 5
+                next
+            end
+        next
+        edit "Default_Office_365"
+            set server "www.office.com"
+            set protocol https
+            set interval 120000
+            set probe-timeout 120000
+            set recoverytime 10
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 5
+                next
+            end
+        next
+        edit "Default_Gmail"
+            set server "gmail.com"
+            set interval 1000
+            set probe-timeout 1000
+            set recoverytime 10
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 2
+                next
+            end
+        next
+        edit "Default_Google Search"
+            set server "www.google.com"
+            set protocol https
+            set interval 120000
+            set probe-timeout 120000
+            set recoverytime 10
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 5
+                next
+            end
+        next
+        edit "Default_FortiGuard"
+            set server "fortiguard.com"
+            set protocol https
+            set interval 120000
+            set probe-timeout 120000
+            set recoverytime 10
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 5
+                next
+            end
+        next
+        edit "HQ_SLA"
+            set server "10.10.61.1"
+            set failtime 500
+            set recoverytime 50
+            set members 2
+        next
+        edit "HQ_SLA_MPLS"
+            set server "203.0.113.5"
+            set failtime 500
+            set recoverytime 50
+            set members 1
+        next
+    end  
+    config service
+        edit 1
+            set name "TO_HQ_LAN"
+            set dst "HQ_LAN"
+            set priority-members 1 2
+        next
+    end  
+end      

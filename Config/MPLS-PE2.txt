@@ -1,0 +1,170 @@
+﻿MPLS-PE2#sh run
+Building configuration...
+
+Current configuration : 2064 bytes
+!
+version 15.5
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname MPLS-PE2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+bsd-client server url https://cloudsso.cisco.com/as/token.oauth2
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+          
+          
+!         
+ip vrf CUST-A
+ rd 65200:100
+ route-target export 65200:100
+ route-target import 65200:100
+!         
+!         
+!         
+!         
+ip cef    
+no ipv6 cef
+!         
+multilink bundle-name authenticated
+mpls label protocol ldp
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+cts logging verbose
+!         
+!         
+!         
+redundancy
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+interface Loopback0
+ ip address 100.65.0.12 255.255.255.255
+!         
+interface Ethernet0/0
+ ip address 100.65.1.10 255.255.255.252
+ mpls ip  
+!         
+interface Ethernet0/1
+ ip vrf forwarding CUST-A
+ ip address 203.0.113.9 255.255.255.252
+!         
+interface Ethernet0/2
+ ip vrf forwarding CUST-A
+ ip address 203.0.113.13 255.255.255.252
+!         
+interface Ethernet0/3
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/0
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/1
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/2
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/3
+ no ip address
+ shutdown 
+!         
+router ospf 20
+ router-id 100.65.0.12
+ network 100.65.0.12 0.0.0.0 area 0
+ network 100.65.1.4 0.0.0.3 area 0
+ network 100.65.1.8 0.0.0.3 area 0
+!         
+router bgp 65200
+ bgp router-id 100.65.0.12
+ bgp log-neighbor-changes
+ neighbor 100.65.0.1 remote-as 65200
+ neighbor 100.65.0.1 update-source Loopback0
+ !        
+ address-family vpnv4
+  neighbor 100.65.0.1 activate
+  neighbor 100.65.0.1 send-community extended
+ exit-address-family
+ !        
+ address-family ipv4 vrf CUST-A
+  neighbor 203.0.113.10 remote-as 65102
+  neighbor 203.0.113.10 activate
+  neighbor 203.0.113.14 remote-as 65103
+  neighbor 203.0.113.14 activate
+ exit-address-family
+!         
+ip forward-protocol nd
+!         
+!         
+no ip http server
+no ip http secure-server
+!         
+!         
+!         
+mpls ldp router-id Loopback0 force
+!         
+control-plane
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login    
+ transport input none
+!         
+!         
+end       
+         

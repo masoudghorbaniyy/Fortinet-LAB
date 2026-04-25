@@ -1,0 +1,166 @@
+﻿INET-RR#sh run
+Building configuration...
+
+Current configuration : 2179 bytes
+!
+version 15.5
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname INET-RR
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+bsd-client server url https://cloudsso.cisco.com/as/token.oauth2
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+          
+          
+!         
+!         
+!         
+!         
+ip cef    
+no ipv6 cef
+!         
+multilink bundle-name authenticated
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+cts logging verbose
+!         
+!         
+!         
+redundancy
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+interface Loopback0
+ ip address 100.64.0.1 255.255.255.255
+!         
+interface Ethernet0/0
+ ip address 100.64.1.1 255.255.255.252
+!         
+interface Ethernet0/1
+ ip address 100.64.1.5 255.255.255.252
+!         
+interface Ethernet0/2
+ ip address dhcp
+!         
+interface Ethernet0/3
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/0
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/1
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/2
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/3
+ no ip address
+ shutdown 
+!         
+router ospf 10
+ router-id 100.64.0.1
+ network 100.64.0.1 0.0.0.0 area 0
+ network 100.64.1.0 0.0.0.3 area 0
+ network 100.64.1.4 0.0.0.3 area 0
+ default-information originate
+!         
+router bgp 65210
+ bgp router-id 100.64.0.1
+ bgp log-neighbor-changes
+ neighbor 100.64.0.11 remote-as 65210
+ neighbor 100.64.0.11 update-source Loopback0
+ neighbor 100.64.0.12 remote-as 65210
+ neighbor 100.64.0.12 update-source Loopback0
+ !        
+ address-family ipv4
+  network 0.0.0.0
+  neighbor 100.64.0.11 activate
+  neighbor 100.64.0.11 route-reflector-client
+  neighbor 100.64.0.11 next-hop-self
+  neighbor 100.64.0.12 activate
+  neighbor 100.64.0.12 route-reflector-client
+  neighbor 100.64.0.12 next-hop-self
+ exit-address-family
+!         
+ip forward-protocol nd
+!         
+!         
+no ip http server
+no ip http secure-server
+ip route 0.0.0.0 0.0.0.0 192.168.2.1 254
+ip route 198.51.100.0 255.255.255.252 100.64.1.2
+ip route 198.51.100.4 255.255.255.252 100.64.1.2
+ip route 198.51.100.8 255.255.255.252 100.64.1.6
+ip route 198.51.100.12 255.255.255.252 100.64.1.6
+!         
+!         
+!         
+!         
+control-plane
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login    
+ transport input none
+!         
+ntp server pnpntpserver.home.local
+!         
+end

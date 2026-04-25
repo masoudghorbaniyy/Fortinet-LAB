@@ -1,0 +1,148 @@
+﻿MPLS-P1#sh run
+Building configuration...
+
+Current configuration : 1486 bytes
+!
+version 15.5
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname MPLS-P1
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+!
+!
+bsd-client server url https://cloudsso.cisco.com/as/token.oauth2
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+          
+          
+!         
+!         
+!         
+!         
+ip cef    
+no ipv6 cef
+!         
+multilink bundle-name authenticated
+mpls label protocol ldp
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+cts logging verbose
+!         
+!         
+!         
+redundancy
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+interface Loopback0
+ ip address 100.65.0.2 255.255.255.255
+!         
+interface Ethernet0/0
+ ip address 100.65.1.2 255.255.255.252
+ mpls ip  
+!         
+interface Ethernet0/1
+ ip address 100.65.1.9 255.255.255.252
+ mpls ip  
+!         
+interface Ethernet0/2
+ ip address 100.65.1.5 255.255.255.252
+ mpls ip  
+!         
+interface Ethernet0/3
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/0
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/1
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/2
+ no ip address
+ shutdown 
+!         
+interface Ethernet1/3
+ no ip address
+ shutdown 
+!         
+router ospf 20
+ router-id 100.65.0.2
+ network 100.65.0.2 0.0.0.0 area 0
+ network 100.65.1.0 0.0.0.3 area 0
+ network 100.65.1.4 0.0.0.3 area 0
+ network 100.65.1.8 0.0.0.3 area 0
+!         
+ip forward-protocol nd
+!         
+!         
+no ip http server
+no ip http secure-server
+!         
+!         
+!         
+mpls ldp router-id Loopback0 force
+!         
+control-plane
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+!         
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+ login    
+ transport input none
+!         
+!         
+end       
+       
